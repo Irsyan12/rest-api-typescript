@@ -10,5 +10,8 @@ mongoose
   .catch((error) => {
     logger.error("Database connection failed", error);
     logger.error(error);
-    process.exit(1);
+    // Don't exit process in serverless environment
+    if (process.env.NODE_ENV !== "production") {
+      process.exit(1);
+    }
   });

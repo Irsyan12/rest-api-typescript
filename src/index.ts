@@ -10,7 +10,7 @@ import "./utils/connectDB";
 import deserializedToken from "./middleware/deserializedToken";
 
 const app: Application = express();
-const port: Number = 3000;
+const port: Number = process.env.PORT ? parseInt(process.env.PORT) : 3000;
 
 // parse body request
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -28,6 +28,20 @@ app.use((req, res, next) => {
 app.use(deserializedToken);
 routes(app);
 
-app.listen(port, () => {
-  logger.info(`Server is listening on port ${port}`);
+// Health check endpoint
+app.get("/", (req, res) => {
+  res.status(200).json({
+    status: true,
+    message: "API is running successfully",
+    timestamp: new Date().toISOString(),
+  });
 });
+
+if (process.env.NODE_ENV !== "production") {
+  app.listen(port, () => {
+    logger.info(`Server is listening on port ${port}`);
+  });
+}
+
+// Export for Vercel
+export default app;
