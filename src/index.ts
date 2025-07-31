@@ -7,6 +7,8 @@ import cors from "cors";
 // connect to database
 import "./utils/connectDB";
 
+import deserializedToken from "./middleware/deserializedToken";
+
 const app: Application = express();
 const port: Number = 3000;
 
@@ -23,6 +25,7 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use(deserializedToken);
 routes(app);
 
 app.listen(port, () => {

@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import config from "../config/evirontment";
+import config from "../config/environtment";
 import { logger } from "./logger";
 
 mongoose
