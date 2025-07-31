@@ -1,12 +1,9 @@
-import express, { Application } from "express";
+import express, { Application, Request, Response } from "express";
 import { routes } from "./routes";
 import { logger } from "./utils/logger";
 import bodyParser from "body-parser";
 import cors from "cors";
-
-// connect to database
-import "./utils/connectDB";
-
+import connectDB from "./utils/connectDB";
 import deserializedToken from "./middleware/deserializedToken";
 
 const app: Application = express();
@@ -25,8 +22,25 @@ app.use((req, res, next) => {
   next();
 });
 
+// Middleware to ensure database connection
+app.use(async (req: Request, res: Response, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (error) {
+    logger.error("Database connection error:", error);
+    res.status(500).json({
+      status: false,
+      message: "Database connection failed",
+      error:
+        process.env.NODE_ENV === "development"
+          ? error
+          : "Internal server error",
+    });
+  }
+});
+
 app.use(deserializedToken);
-routes(app);
 
 // Health check endpoint
 app.get("/", (req, res) => {
@@ -36,6 +50,8 @@ app.get("/", (req, res) => {
     timestamp: new Date().toISOString(),
   });
 });
+
+routes(app);
 
 if (process.env.NODE_ENV !== "production") {
   app.listen(port, () => {
